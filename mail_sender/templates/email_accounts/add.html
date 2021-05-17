@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Добавить почту для рассылки
+{% endblock %}
+
+{% block styles %}
+  .hidden-block{
+    display: none;
+  }
+{% endblock %}
+
+{% block content %}
+  {% if errors %}
+    <div class="alert alert-danger alert alert-dismissable fade in">
+      <a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>
+      {{ errors }}
+    </div>
+  {% endif %}
+
+  <form action="{{ form_action }}" method="POST">
+    {% csrf_token %}
+    <div class="form-group">
+      <label for="id_email">Email</label>
+      {{ form.email }}
+    </div>
+    <div class="form-group">
+      <label for="id_password">Пароль</label>
+      {{ form.password }}
+    </div>
+    <div class="form-group">
+      <label for="id_smtp">SMTP-сервер</label>
+      {{ form.smtp }}
+    </div>
+
+    <div id="new_smtp" class="hidden-block">
+      <div class="form-group">
+        <label for="id_smtp_host">SMTP-сервер (IP)</label>
+        {{ form.smtp_host }}
+      </div>
+      <div class="form-group">
+        <label for="id_smtp_port">Порт</label>
+        {{ form.smtp_port }}
+      </div>
+      <div class="form-group">
+        <label for="id_smtp_name">Название (необязательное поле)</label>
+        {{ form.smtp_name }}
+      </div>
+    </div>
+
+    <div class="form-group">
+      <button class="btn btn-primary" type="submit" id="custom_email_account_create">
+        Добавить новый Email-аккаунт
+      </button>
+    </div>
+  </form>
+
+  <script>
+    jQuery(function () {
+      window.smtp_select = $('#id_smtp');
+      window.smt_create_block = $( '#new_smtp' );
+
+      window.smtp_select.on('load change', function(e){
+        if (window.smtp_select.val() === 'new'){
+          window.smt_create_block.removeClass('hidden-block');
+        } else {
+          window.smt_create_block.addClass('hidden-block');
+        }
+      });
+
+      window.smtp_select.ready( window.smtp_select.trigger('change') );
+    });
+  </script>
+{% endblock %}

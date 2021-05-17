@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block metatags %}
+    <meta name="keywords" content="сервис email, mail sender, рассылки">
+    <meta name="description" content="Mail-sender" />
+{% endblock %}
+
+{% block title %}
+    Главная
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+      <strong>Сервис email-рассылки HTML-шаблонов включает в себя следующие функции:</strong>
+      <ul>
+        <li>Возможность использовать стандартные (Yandex, Mail) или пользовательские SMTP-серверы;</li>
+        <li>Хранение клиентских списков адресов, на которые осуществляется рассылка;</li>
+        <li>Хранение списка ваших адресов, с которых осуществляется рассылка;</li>
+        <li>Отображение списка клиентов, отписавшихся от рассылки;</li>
+        <li>Удобный API.</li>
+      </ul>
+    </div>
+
+    <div class="row">
+      <strong>Рассказать о нас друзьям:</strong>
+      <ul>
+        <li>ВК</li>
+      </ul>
+    </div>
+
+    <div class="row">
+      <strong>Стоимость сервиса:</strong>
+      <ul>
+        <li>100500 рублей в сутки.</li>
+      </ul>
+    </div>
+
+    {% if not user.is_authenticated %}
+      <div class="row">
+        <strong>
+          Вы не авторизованы. Для пользования сервисом <a href="{{ signup_url }}">зарегистрируйтесь</a> или <a href="{{ login_url }}">войдите в свой аккаунт</a>.
+        </strong>
+      </div>
+    {% endif %}
+{% endblock %}

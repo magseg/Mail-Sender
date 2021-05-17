@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load custom_tags %}
+
+{% block title %}
+  Мои списки адресатов
+{% endblock %}
+
+{% block content %}
+  <form action="{{ delete_url }}" method="POST" id="delete_addressee_list_form" name="delete_addressee_list_form">
+  {% csrf_token %}
+  </form>
+
+  <div class="clearfix"></div>
+  <div class="form-group pull-right">
+    <a
+      class="btn btn-success"
+      id="create_addressee_list_button"
+      href="#"
+      style="margin-left: 10px;"
+    >
+      <i class="glyphicon glyphicon-plus"></i>&nbsp;Загрузить список адресатов
+    </a>
+    <a
+      class="btn btn-danger"
+      id="delete-addressee-lists-link-popup"
+      href="#delete-addressee-lists-popup"
+    >
+      <i class="glyphicon glyphicon-minus"></i>&nbsp;<span>Удалить</span>
+    </a>
+  </div>
+  <div class="clearfix"></div>
+
+  {% if file_upload_success_message %}
+    <div class="form-group">
+      <div class="alert alert-success alert-dismissable fade in">
+        <a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>
+        {{ file_upload_success_message }}
+      </div>
+    </div>
+  {% endif %}
+
+  {% if file_upload_errors %}
+    <div class="form-group">
+      <div class="alert alert-danger alert-dismissable fade in">
+        <a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>
+        <ul>
+        {% for error in file_upload_errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+        </ul>
+      </div>
+    </div>
+  {% endif %}
+
+  {% if delete_successful_message %}
+    <div class="form-group">
+      <div class="alert alert-success alert-dismissable fade in">
+        <a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>
+        {{ delete_successful_message }}
+      </div>
+    </div>
+  {% endif %}
+
+  {% if delete_errors %}
+    <div class="form-group">
+      <div class="alert alert-danger alert-dismissable fade in">
+        <a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>
+        <ul>
+        {% for error in delete_errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+        </ul>
+      </div>
+    </div>
+  {% endif %}
+
+  <div id="delete-addressee-lists-popup" class="white-popup-block mfp-hide popup-hidden">
+    <h2>Вы действительно хотите удалить списки рассылок?</h2>
+    <div class="btn-group" role="group">
+    <button
+      type="submit"
+      id="delete-addressee-lists-submit-btn"
+      class="btn btn-sm btn-danger btn-hidden"
+      form="delete_addressee_list_form"
+    >Удалить</button>
+    <a class="popup-modal-dismiss btn btn-sm btn-default" href="#">Отмена</a>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>
+            <input type="checkbox" name="select_all" id="select_all" />
+          </th>
+          <th>Название</th>
+          <th>Дата создания</th>
+          <th>Число получателей</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in addressee_lists %}
+          <tr>
+            <td>
+              <input
+                type="checkbox"
+                value="{{ item.id }}"
+                name="addressee_lists"
+                class="addressee_list_checkbox"
+                form="delete_addressee_list_form"
+              />
+            </td>
+            <td><a href="{{ base_addressee_small_list_url }}{{ item.id }}">{{ item.name }}</a></td>
+            <td>{% frontend_datetime item.created_at %}</td>
+            <td>{{ item.addressee_count }}</td>
+          </tr>
+        {% endfor %}
+        <tr id="create_addressee_list_row">
+          <td colspan="4">
+            <form
+              action="{{ upload_url }}"
+              method="POST"
+              id="upload_addressee_list_form"
+              name="upload_addressee_list_form"
+              enctype="multipart/form-data"
+            >
+              {% csrf_token %}
+              <input id="new_addressee_list" name="addressee_list" type="file">
+              <button type="submit" id="upload_addressee_list">Загрузить</button>
+            </form>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+  jQuery(function () {
+    window.select_all_checkbox = $('#select_all');
+    window.selected_checkboxes = 0;
+    window.total_checkboxes = $('input.addressee_list_checkbox').length;
+    window.delete_addressee_list_button = $('#delete-addressee-lists-link-popup');
+
+    $('#create_addressee_list_button').on('click', function(e){
+      $('#new_addressee_list').trigger('click');
+      return false;
+    });
+
+    $.ajax({
+      url: "{% static 'js/fileupload/fileinput.min.js' %}",
+      dataType: "script",
+      cache: true,
+      success: function(data){
+        $('head')
+          .append( $("<link rel=\"stylesheet\" type=\"text/css\" />")
+          .attr('href', "{% static 'css/fileinput/styles.css' %}") );
+        $.ajax({
+          url: "{% static 'js/fileupload/ru.js' %}",
+          dataType: "script",
+          cache: true,
+          success: function(data){
+            $("#new_addressee_list").fileinput({
+              allowedFileExtensions: ["txt"],
+              browseOnZoneClick: true,
+              language: "ru",
+              showCaption: true,
+            });
+            $('#upload_addressee_list').css('display', 'none');
+          },
+          async: true
+      });
+      },
+      async: true
+    });
+
+    $.ajax({
+      url: "{% static 'js/jquery.magnific-popup.js' %}",
+      dataType: "script",
+      cache: true,
+      success: function(data){
+        $('head')
+          .append( $("<link rel=\"stylesheet\" type=\"text/css\" />")
+          .attr('href', "{% static 'css/magnific-popup.css' %}") );
+
+        $('#delete-addressee-lists-link-popup').magnificPopup({
+          type: 'inline',
+          preloader: false,
+          modal: true,
+          disableOn: function(){
+            return !(window.selected_checkboxes === 0);
+          }
+        });
+
+        $(document).on('click', '.popup-modal-dismiss', function (e) {
+            e.preventDefault();
+            $.magnificPopup.close();
+        });
+      },
+      async: true,
+    });
+
+    window.select_all_checkbox.on('change', function(e){
+      let curr_prop = window.select_all_checkbox.prop('checked');
+      window.selected_checkboxes = 0;
+      $('input.addressee_list_checkbox').each(function(idx){
+        $(this).prop('checked', curr_prop);
+        window.selected_checkboxes += curr_prop;
+      });
+      window.delete_addressee_list_button.attr('disabled', (window.selected_checkboxes === 0));
+    });
+
+    $('input.addressee_list_checkbox').on('change', function(e){
+      let elem = $(e.currentTarget);
+      let curr_prop = elem.prop('checked');
+      window.selected_checkboxes += curr_prop ? 1 : -1;
+      window.select_all_checkbox.prop('checked', (window.total_checkboxes) === (window.selected_checkboxes));
+      window.delete_addressee_list_button.attr('disabled', (window.selected_checkboxes === 0));
+    });
+
+    window.select_all_checkbox.ready( window.select_all_checkbox.prop('checked', false).trigger('change') );
+  });
+  </script>
+{% endblock %}

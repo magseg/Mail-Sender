@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block metatags %}
+    {% include "includes/no_robots.html" %}
+{% endblock %}
+
+{% block title %}
+    Мои адресаты
+{% endblock %}
+
+{% block content %}
+<div class="form-group pull-right">
+    <a class="btn btn-success" style="margin-left: 10px;"><i class="glyphicon glyphicon-plus"></i> Добавить почту</a>
+    <a class="btn btn-danger" style="opacity: 0.5;" id="delete_mail_button"><i class="glyphicon glyphicon-minus"></i> Удалить почту</a>
+</div>
+<table class="table table-striped">
+    <thead>
+        <tr>
+        <th><input type="checkbox" name="select_all" id="select_all" /></th>
+        <th>Почта</th>
+        <th>SMTP-сервер</th>
+        <th>Отписки</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+        <td><input type="checkbox" name="0001" id="0001" class="mail_checkbox" /></td>
+        <td>wow</td>
+        <td>188.11.0.144</td>
+        <td>14</td>
+        </tr>
+    </tbody>
+</table>
+{% endblock %}

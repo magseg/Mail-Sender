@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load custom_tags %}
+
+{% block title %}
+    Мои почты для рассылки
+{% endblock %}
+
+{% block content %}
+{% if success_create %}
+  <div class="form-group">
+    <div class="alert alert-success alert-dismissable fade in">
+      <a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>
+      Почта для рассылки успешно добавлена.
+    </div>
+  </div>
+{% endif %}
+
+
+{% if success_delete_message %}
+  <div class="form-group">
+    <div class="alert alert-success alert-dismissable fade in">
+      <a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>
+      {{ success_delete_message }}
+    </div>
+  </div>
+{% endif %}
+
+
+{% if delete_errors %}
+  <div class="form-group">
+    <div class="alert alert-danger alert-dismissable fade in">
+      <a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>
+      <ul>
+      {% for error in delete_errors %}
+        <li>{{ error }}</li>
+      {% endfor %}
+      </ul>
+    </div>
+  </div>
+{% endif %}
+
+
+<div class="clearfix"></div>
+<div class="form-group pull-right">
+  <a
+      class="btn btn-success"
+      href="{{ add_url }}"
+      style="margin-left: 10px;"
+  >
+    <i class="glyphicon glyphicon-plus"></i>&nbsp;Добавить почту
+  </a>
+  <a
+    class="btn btn-danger"
+    href="#delete-email-accounts-popup"
+    id="delete-email-account-popup-link"
+  >
+    <i class="glyphicon glyphicon-minus"></i>&nbsp;<span id="delete_email_accounts_button_text">Удалить</span>
+  </a>
+</div>
+<div class="clearfix"></div>
+
+<form action="{{ delete_url }}" method="POST" id="delete_email_account_form" name="delete_email_account_form">
+{% csrf_token %}
+</form>
+
+<div id="delete-email-accounts-popup" class="white-popup-block mfp-hide popup-hidden">
+  <h2>Вы действительно хотите удалить Email-аккаунты?</h2>
+  <div class="btn-group" role="group">
+  <button
+    type="submit"
+    id="delete-email-accounts-submit-btn"
+    class="btn btn-sm btn-danger btn-hidden"
+    form="delete_email_account_form"
+  >Удалить</button>
+  <a class="popup-modal-dismiss btn btn-sm btn-default" href="#">Отмена</a>
+  </div>
+</div>
+
+<div class="form-group">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>
+          <input type="checkbox" name="select_all" id="select_all" />
+        </th>
+        <th>Почта</th>
+        <th>Пароль</th>
+        <th>SMTP-сервер</th>
+        <th>Отписки</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in smtp_list %}
+        <tr>
+          <td>
+            <input
+                type="checkbox"
+                value="{{ item.id }}"
+                name="accounts"
+                class="mail_checkbox"
+                form="delete_email_account_form"
+            />
+          </td>
+          <td><a href="{{ email_account_item_url }}{{ item.id }}">{{ item.email }}</a></td>
+          <td class="password-column" data-password="{% decipher_password item.password %}">
+            <span class="span-password">******</span>&nbsp;<i class="glyphicon glyphicon-eye-close password-hide-show"></i>
+          </td>
+          <td>
+            {% if item.common_smtp %}
+              {{ item.common_smtp.host }}
+            {% elif item.custom_smtp %}
+              {{ item.custom_smtp.host }}
+            {% else %}
+              Неизвестно.
+            {% endif %}
+          </td>
+          <td>{{ item.unsubscriber_count }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script>
+  jQuery(function () {
+    window.select_all_checkbox = $('#select_all');
+    window.selected_checkboxes = 0;
+    window.total_checkboxes = $('input.mail_checkbox').length;
+    window.delete_email_accounts_button = $('#delete-email-account-popup-link');
+
+    window.select_all_checkbox.on('change', function(e){
+      let curr_prop = window.select_all_checkbox.prop('checked');
+      window.selected_checkboxes = 0;
+      $('input.mail_checkbox').each(function(idx){
+        $(this).prop('checked', curr_prop);
+        window.selected_checkboxes += curr_prop;
+      });
+      window.delete_email_accounts_button.attr('disabled', (window.selected_checkboxes === 0));
+    });
+
+    $('input.mail_checkbox').on('change', function(e){
+      let elem = $(e.currentTarget);
+      let curr_prop = elem.prop('checked');
+      window.selected_checkboxes += curr_prop ? 1 : -1;
+      window.select_all_checkbox.prop('checked', (window.total_checkboxes) === (window.selected_checkboxes));
+      window.delete_email_accounts_button.attr('disabled', (window.selected_checkboxes === 0));
+    });
+
+    $('.password-hide-show').on('click', function(e){
+      let link = $(e.currentTarget);
+      link.toggleClass('glyphicon-eye-open glyphicon-eye-close');
+      let link_closed = link.hasClass('glyphicon-eye-close');
+      let password = link.closest('.password-column').attr('data-password');
+      link.prev('.span-password').html( (link_closed ? '******' : password ) );
+    });
+
+    $.ajax({
+      url: "{% static 'js/jquery.magnific-popup.js' %}",
+      dataType: "script",
+      cache: true,
+      success: function(data){
+        $('head')
+          .append( $("<link rel=\"stylesheet\" type=\"text/css\" />")
+          .attr('href', "{% static 'css/magnific-popup.css' %}") );
+
+        $('#delete-email-account-popup-link').magnificPopup({
+          type: 'inline',
+          preloader: false,
+          modal: true,
+          disableOn: function(){
+            return !(window.selected_checkboxes === 0);
+          }
+        });
+
+        $(document).on('click', '.popup-modal-dismiss', function (e) {
+            e.preventDefault();
+            $.magnificPopup.close();
+        });
+      },
+      async: true,
+    });
+
+    window.select_all_checkbox.ready( window.select_all_checkbox.prop('checked', false).trigger('change') );
+  });
+</script>
+{% endblock %}

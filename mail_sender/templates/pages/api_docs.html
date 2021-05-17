@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Документация API
+{% endblock %}
+
+{% block styles %}
+  h3{
+    margin-top: 10px;
+    margin-left: 5px;
+    margin-bottom: 12px;
+  }
+{% endblock %}
+
+{% block content %}
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>
+          <h3>Рассылка email через API</h3>
+          <span style="font-weight: 100;">Для рассылки необходим почтовый аккаунт на сайте {{ base_url }} с API-ключом.</span>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <h3>Конечная точка (endpoint)</h3>
+          <strong>POST</strong> {{ external_mailing_url }}
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <h3>Заголовки (headers)</h3>
+          <strong>Content-Type:</strong>&nbsp;application/json; charset=utf-8<br/>
+          <strong>Api-key:</strong>&nbsp;<em>API-ключ вашей почты для рассылки</em>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <h3>Тело запроса (body)</h3>
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Имя параметра</th>
+                <th>Тип</th>
+                <th>Обязательный</th>
+                <th>Ограничения</th>
+                <th>Расшифровка</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>subject</td>
+                <td>String</td>
+                <td>Да</td>
+                <td>Суммарная длина полей subject и from_name не более ~990 символов.</td>
+                <td>Тема письма.</td>
+              </tr>
+              <tr>
+                <td>recipients</td>
+                <td>[String (email)]</td>
+                <td>Да</td>
+                <td>Непустой массив.</td>
+                <td>Массив Email'ов получателей.</td>
+              </tr>
+              <tr>
+                <td>from_name</td>
+                <td>String</td>
+                <td>Да</td>
+                <td>Суммарная длина полей subject и from_name не более ~990 символов.</td>
+                <td>Человекочитаемое имя отправителя.</td>
+              </tr>
+              <tr>
+                <td>html_body</td>
+                <td>String</td>
+                <td>Да</td>
+                <td></td>
+                <td>HTML-шаблон письма.</td>
+              </tr>
+              <tr>
+                <td>cooldown</td>
+                <td>Integer</td>
+                <td>Нет</td>
+                <td>Минимальное значение: 1</td>
+                <td>Величина задержки между отправками писем в <strong>десятых долях секунды</strong>. Значение по умолчанию: <strong>15</strong>.</td>
+              </tr>
+            </tbody>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <h3>Возможный ответ</h3>
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Код статуса</th>
+                <th>Расшифровка</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>204 No Response</td>
+                <td>Рассылка успешно запущена в фоновом режиме.</td>
+              </tr>
+              <tr><td colspan="2"><i>Пустое тело ответа</i></td></tr>
+              <tr>
+                <td>400 Bad Request</td>
+                <td>Некорректное тело запроса.</td>
+              </tr>
+              <tr><td colspan="2"><pre id="invalidbody"></pre></td></tr>
+              <tr>
+                <td>401 Unauthorized</td>
+                <td>Токен аутентификации имеет неверный формат.</td>
+              </tr>
+              <tr><td colspan="2"><pre id="invalidtoken"></pre></td></tr>
+              <tr>
+                <td>401 Unauthorized</td>
+                <td>Неверный токен авторизации.</td>
+              </tr>
+              <tr><td colspan="2"><pre id="wrongtoken"></pre></td></tr>
+              <tr>
+                <td>409 Conflict</td>
+                <td>Для аккаунта не задан host или port.</td>
+              </tr>
+              <tr><td colspan="2"><pre id="invalidaccount"></pre></td></tr>
+            </tbody>
+          </table>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <script>
+    jQuery(function () {
+      var json_token_non_authorized = {"detail": "Токен аутентификации имеет неверный формат."};
+      $("#invalidtoken").html(JSON.stringify(json_token_non_authorized, undefined, 2));
+
+      var json_invalidbody = {"subject": ["Это поле обязательно."],"html_body": ["Это поле обязательно."],"recipients": {"0": ["Введите корректный адрес электронной почты."],"1": ["Это поле не может быть пустым."]},"from_name": ["Это поле обязательно."]};
+      $("#invalidbody").html(JSON.stringify(json_invalidbody, undefined, 2));
+
+      var json_token_wrong = {"detail": "Неверный токен авторизации."};
+      $("#wrongtoken").html(JSON.stringify(json_token_wrong, undefined, 2));
+
+      var invalidaccount = {"detail": "Для аккаунта не задан host или port."};
+      $("#invalidaccount").html(JSON.stringify(invalidaccount, undefined, 2));
+    });
+  </script>
+{% endblock %}

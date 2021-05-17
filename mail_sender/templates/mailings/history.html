@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% load custom_tags %}
+
+{% block title %}
+    Мои рассылки (история)
+{% endblock %}
+
+{% block content %}
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Почта</th>
+        <th>Дата</th>
+        <th>Всего</th>
+        <th>Отправлено</th>
+        <th>Не отправлено</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in sender_history %}
+        <tr>
+          <td><a href="{{ history_item_url }}{{ item.id }}">{{ item.email_account.email }}</a></td>
+          <td>{% frontend_datetime item.created_at %}</td>
+          <td>{{ item.total_mailings }}</td>
+          <td>{{ item.successed }}</td>
+          <td>{{ item.failed }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

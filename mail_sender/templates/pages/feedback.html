@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Обратная связь
+{% endblock %}
+
+{% block content %}
+  <form action="{{ ask_url }}" method="POST">
+    {% csrf_token %}
+    {% if not user.is_authenticated %}
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="Ваш email" class="form-control" required />
+      </div>
+
+      <div class="form-group">
+        <label for="name">Имя</label>
+        <input type="text" id="name" name="name" placeholder="Как к вам обращаться" class="form-control" required />
+      </div>
+    {% endif %}
+
+    <div class="form-group">
+      <label for="feedback">Текст обращения</label>
+      <textarea id="feedback" name="feedback" placeholder="Новое обращение..." class="form-control" required></textarea>
+    </div>
+
+    <div class="form-group">
+      <button type="submit" class="btn btn-primary">Отправить</button>
+    </div>
+  </form>
+{% endblock %}

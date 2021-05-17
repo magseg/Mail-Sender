@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block metatags %}
+    {% include "includes/no_robots.html" %}
+{% endblock %}
+
+{% block title %}
+    Профиль {{ user.profile }}
+{% endblock %}
+
+{% block content %}
+  <div class="row">
+    <div class="col-lg-6" style="margin-top: 16px;">
+      {% if errors.edit_profile %}
+        <div class="alert alert-danger alert alert-dismissable fade in">
+          <a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>
+          <ul>
+            {% for error in errors.edit_profile %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+      {% if success.edit_profile %}
+        <div class="alert alert-success alert alert-dismissable fade in">
+          <a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>
+          <ul>
+            {% for message in success.edit_profile %}
+              <li>{{ message }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+      <form action="{{ profile_url }}" method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="last_name">Фамилия</label>
+          <input type="text" id="last_name" name="last_name" maxlength="254" class="form-control" value="{{ last_name }}"/>
+        </div>
+        <div class="form-group">
+          <label for="first_name">Имя</label>
+          <input type="text" id="first_name" name="first_name" maxlength="254" class="form-control" value="{{ first_name }}"/>
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" maxlength="254" class="form-control" value="{{ email }}"/>
+        </div>
+        <div class="form-group">
+          <button class="btn btn-primary" type="submit" id="profile_update_user_info">
+            Обновить данные профиля</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="col-lg-6" style="margin-top: 16px;">
+      {% if errors.change_password %}
+        <div class="alert alert-danger alert alert-dismissable fade in">
+          <a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>
+          <ul>
+            {% for error in errors.change_password %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+      {% if success.change_password %}
+        <div class="alert alert-success alert alert-dismissable fade in">
+          <a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>
+          <ul>
+            {% for message in success.change_password %}
+              <li>{{ message }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+      <form action="{{ profile_url }}" method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="old_password">Старый пароль</label>
+          <input type="password" id="old_password" maxlength="254" name="old_password" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label for="new_password_1">Новый пароль</label>
+          <input type="password" id="new_password_1" maxlength="254" name="new_password_1" class="form-control"/>
+        </div>
+        <div class="form-group">
+          <label for="new_password_2">Повторите новый пароль</label>
+          <input type="password" id="new_password_2" maxlength="254" name="new_password_2" class="form-control"/>
+        </div>
+        <div class="form-group">
+          <button class="btn btn-primary" type="submit" id="profile_change_password">
+            Сменить пароль</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  FAQ
+{% endblock %}
+
+{% block styles %}
+  {% include 'includes/accordeon_styles.html' %}
+{% endblock %}
+
+{% block content %}
+  <div class="accordion-container">
+    {% for question in questions %}
+      <div class="set">
+        <a href="#">
+        {{ question.question }}
+        <i class="glyphicon glyphicon-plus"></i>
+        </a>
+        <div class="content">
+        <p>{{ question.answer|safe }}</p>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+    {% if errors %}
+    <div class="form-group">
+      <div class="alert alert-danger alert-dismissable fade in">
+        <a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>
+        <ul>
+        {% for error in errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+        </ul>
+      </div>
+    </div>
+  {% endif %}
+
+  <form action="{{ ask_url }}" method="POST">
+    {% csrf_token %}
+    <div class="form-group" style="margin-top: 30px;">
+      <label for="ask_question">Задать вопрос</label>
+      <textarea id="ask_question" name="ask_question" placeholder="Новый вопрос..." class="form-control"></textarea>
+    </div>
+
+    <div class="form-group">
+      <button type="submit" class="btn btn-default">Отправить</button>
+    </div>
+  </form>
+
+  <script>
+  // https://codepen.io/vikasverma93/pen/raxGaM
+  jQuery(function () {
+    $(".set > a").on("click", function() {
+      if ($(this).hasClass("active")) {
+        $(this).removeClass("active");
+        $(this)
+          .siblings(".content")
+          .slideUp(200);
+        $(".set > a i")
+          .removeClass("glyphicon-minus")
+          .addClass("glyphicon-plus");
+      } else {
+        $(".set > a i")
+          .removeClass("glyphicon-minus")
+          .addClass("glyphicon-plus");
+        $(this)
+          .find("i")
+          .removeClass("glyphicon-plus")
+          .addClass("glyphicon-minus");
+        $(".set > a").removeClass("active");
+        $(this).addClass("active");
+        $(".content").slideUp(200);
+        $(this)
+          .siblings(".content")
+          .slideDown(200);
+      }
+    });
+  });
+  </script>
+{% endblock %}

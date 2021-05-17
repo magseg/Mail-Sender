@@ -1,0 +1,145 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/ico" href="/favicon.ico?v=2"/>
+  {% block metatags %}{% endblock %}
+  <script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+  <title>{% block title %}{% endblock %}</title>
+  <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'css/magnific-popup.css' %}" rel="stylesheet">
+  <style>
+    html{
+      height: 100%;
+    }
+    body{
+      height: 100%;
+    }
+    #wrapper{
+      display: flex;
+      width: 100%;
+      align-items: stretch;
+      padding-top: 60px;
+      height: 100%;
+    }
+    #sidebar{
+      min-width: 300px;
+      max-width: 300px;
+      height: 100%;
+      border-right: 1px #e3e3e3 solid;
+      position: fixed;
+      top: 50px;
+      padding-top: 20px;
+    }
+    #sidebar-upper-group-list{
+      border-radius: 0px;
+      -webkit-box-shadow: 0 0px;
+      box-shadow: 0 0px;
+    }
+    #sidebar-bottom-group-list{
+      border-radius: 0px;
+      -webkit-box-shadow: 0 0px;
+      box-shadow: 0 0px;
+      position: absolute;
+      bottom: 35px;
+      width: 100%;
+    }
+    #sidebar-upper-group-list > .list-group-item, #sidebar-bottom-group-list > .list-group-item{
+      border: 0px;
+    }
+    .upper-sidebar-link{
+      margin-left: 10px;
+    }
+    .bottom-sidebar-link{
+      margin-left: 20px;
+    }
+    .list-group-item.hover-pride:hover{
+      background-color: #f5e79e;
+    }
+    .list-group-item.version{
+      margin-top: 30px;
+      text-align: center;
+      color: #999999;
+    }
+    #mail-sender-link, #mail-sender-link:hover, #mail-sender-link:active{
+      color: #FFFFFF;
+      text-decoration:none;
+      padding: 15px;
+      font-family: 'Impact', 'Arial';
+    }
+    {% if user.is_authenticated %}
+      #content{
+        margin-left: 370px;
+      }
+    {% endif %}
+    {% block styles %}{% endblock %}
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div style="display: inline-block; float: left; padding: 14px 15px;">
+      <a href="/" style="color: #FFFFFF;" id="mail-sender-link">MAIL SENDER</a>
+    </div>
+    <div style="float: right; padding: 7px 15px;">
+      <div class="dropdown">
+        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+          <i class="glyphicon glyphicon-user"></i>
+          {% if user.is_authenticated %}{{ user.profile }}{% else %}Неавторизованный пользователь{% endif %}
+          <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
+          <li><a href="/">Главная</a></li>
+          {% if user.is_authenticated %}
+            <li><a href="/profile">Профиль {{ user.profile }}</a></li>
+            <li><a href="/logout">Выйти</a></li>
+          {% else %}
+            <li><a href="/login">Войти</a></li>
+          {% endif %}
+          <li role="separator" class="divider"></li>
+          {% if user.is_staff %}
+            <li><a href="/admin/">Админ-панель</a></li>
+          {% endif %}
+          <li><a href="/">Обратная связь</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div id="wrapper">
+    {% if user.is_authenticated %}
+      <div id="sidebar">
+        <div class="list-group" id="sidebar-upper-group-list">
+            <a class="list-group-item hover-pride" href="/mailings/create"><strong><i class="glyphicon glyphicon-plus"></i><span class="upper-sidebar-link">Создать рассылку</span></strong></a>
+          <a class="list-group-item hover-pride" href="/email_accounts/list"><i class="glyphicon glyphicon-envelope"></i><span class="upper-sidebar-link">Мои почты для рассылки</span></a>
+          <a class="list-group-item hover-pride" href="/mailings/addressees/list"><i class="glyphicon glyphicon-send"></i><span class="upper-sidebar-link">Мои адресаты</span></a>
+          <a class="list-group-item hover-pride" href="/mailings/html-templates/list"><i class="glyphicon glyphicon-file"></i><span class="upper-sidebar-link">Мои HTML-шаблоны</span></a>
+          <a class="list-group-item hover-pride" href="/mailings/history"><i class="glyphicon glyphicon-list-alt"></i><span class="upper-sidebar-link">История рассылок</span></a>
+          <a class="list-group-item hover-pride" href="/mailings/unsubscribers/all"><i class="glyphicon glyphicon-ban-circle"></i><span class="upper-sidebar-link">Отписавшиеся</span></a>
+        </div>
+
+        <div class="list-group" id="sidebar-bottom-group-list">
+          <a class="list-group-item hover-pride" href="/faq"><span class="bottom-sidebar-link">FAQ</span></a>
+          <a class="list-group-item hover-pride" href="#"><span class="bottom-sidebar-link">О сервисе</span></a>
+          <a class="list-group-item hover-pride" href="/api-documentation"><span class="bottom-sidebar-link">API документация</span></a>
+          <a class="list-group-item hover-pride" href="/feedback"><span class="bottom-sidebar-link">Обратная связь</span></a>
+          <span class="list-group-item version"><span class="bottom-sidebar-link">v 2.0</span></span>
+        </div>
+      </div>
+    {% endif %}
+    <div id="content" class="container">
+      <div class="row">
+        <div class="col-lg-12" style="margin-bottom: 16px; margin-top: 10px;">
+          <ol class="breadcrumb">{{ breadcumb | safe }}</ol>
+        </div>
+      </div>
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+
+  <script src="{% static 'js/bootstrap.min.js' %}"></script>
+</body>
+</html>

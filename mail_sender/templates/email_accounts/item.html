@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block styles %}
+  .btn-hidden{
+    display: none;
+  }
+
+  .popup-hidden{
+    display: none;
+  }
+{% endblock %}
+
+{% block title %}
+    Данные Email-аккаунта {{ email_account.email }}
+{% endblock %}
+
+
+{% block content %}
+  <form action="{{ update_url }}" method="POST" id="update_email_account_form" name="update_email_account_form">
+  {% csrf_token %}
+  </form>
+
+  <form action="{{ delete_url }}" method="POST" id="delete_email_account_form" name="delete_email_account_form">
+  {% csrf_token %}
+  <input type="number" value="{{ email_account.id }}" form="delete_email_account_form" id="account" name="account" style="display: none" />
+  </form>
+
+  <div id="update-email-account-popup" class="white-popup-block mfp-hide popup-hidden">
+    <p id="update-email-account-popup-additional-text"></p>
+    <p>
+    <button
+      type="submit"
+      id="update-email-account-popup-submit-btn"
+      class="btn btn-xs btn-success btn-hidden"
+      form="update_email_account_form"
+    >Подтвердить изменение</button>
+    <a class="popup-modal-dismiss btn btn-xs btn-default" href="#">Отмена</a>
+    </p>
+  </div>
+
+  <div id="delete-email-account-popup" class="white-popup-block mfp-hide">
+    <h2>Вы действительно хотите удалить аккаунт {{ email_account.email }}?</h2>
+    <p>
+    <button
+      type="submit"
+      id="delete-email-account-popup-submit-btn"
+      class="btn btn-sm btn-danger"
+      form="delete_email_account_form"
+    >Удалить</button>
+    <a class="popup-modal-dismiss btn btn-sm btn-default" href="#">Отмена</a>
+    </p>
+  </div>
+
+  <div class="clearfix"></div>
+  <div class="form-group pull-right">
+    <a href="#delete-email-account-popup" id="delete-email-account-popup-link" style="color: #ab0023; font-weight: 800;">Удалить аккаунт</a>
+  </div>
+  <div class="clearfix"></div>
+
+  {% if updated %}
+  <div class="form-group">
+    <div class="alert alert-success alert-dismissable fade in">
+      <a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>
+      Email-аккаунт успешно обновлен.
+    </div>
+  </div>
+{% endif %}
+
+  {% if update_errors %}
+  <div class="form-group">
+    <div class="alert alert-danger alert-dismissable fade in">
+      <a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>
+      <ul>
+      {% for error in update_errors %}
+        <li>{{ error }}</li>
+      {% endfor %}
+      </ul>
+    </div>
+  </div>
+{% endif %}
+
+  <div class="row">
+    <div class="col-md-5 col-lg-4 col-sm-7 col-xs-12">
+      <div class="form-group">
+        {{ unsubscribe_message | safe }}
+      </div>
+
+      <div class="form-group">
+        <label for="smtp_host">SMTP-сервер (IP)</label>
+        <input type="text" id="smtp_host" name="smtp_host" value="{{ email_account.get_smtp_host }}" form="update_email_account_form" class="form-control" />
+      </div>
+
+      <div class="form-group">
+        <label for="smtp_port">SMTP-порт</label>
+        <input type="number" id="smtp_port" name="smtp_port" value="{{ email_account.get_smtp_port }}" form="update_email_account_form" class="form-control" />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Пароль</label>
+        <div class="input-group">
+          <input type="password" id="password" name="password" value="{{ email_account.get_password }}" class="form-control" form="update_email_account_form" />
+          <span class="input-group-addon" id="toggle-password"><i class="glyphicon glyphicon-eye-close"></i></span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <a class="btn btn-primary" href="#update-email-account-popup" id="update-email-account-popup-open">Обновить</a>
+      </div>
+    </div>
+    <div class="col-md-7 col-lg-8 col-sm-5 col-xs-12">
+      <div class="form-group">
+        <h4>Ключ для API</h4>
+        <p>{{ email_account.external_api_key }}</p>
+      </div>
+      <div class="form-group">
+        <h4>Ссылка для отписки от рассылки</h4>
+        <p>{{ unsubscribe_link }}</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    jQuery(function () {
+      window.csrftoken = $("[name=csrfmiddlewaretoken]").val();
+
+      $('#toggle-password').on('click', function(e){
+        $(this).find('i').toggleClass("glyphicon-eye-open glyphicon-eye-close");
+        let input = $("#password");
+        input.attr('type') === 'password' ? input.attr('type','text') : input.attr('type','password');
+      });
+
+      $.ajax({
+        url: "{% static 'js/jquery.magnific-popup.js' %}",
+        dataType: "script",
+        cache: true,
+        success: function(data){
+          $('head')
+            .append( $("<link rel=\"stylesheet\" type=\"text/css\" />")
+            .attr('href', "{% static 'css/magnific-popup.css' %}") );
+
+          $('#update-email-account-popup-open').magnificPopup({
+            type: 'inline',
+            preloader: false,
+            modal: true
+          });
+
+          $('#delete-email-account-popup-link').magnificPopup({
+            type: 'inline',
+            preloader: false,
+            modal: true
+          });
+
+          $(document).on('click', '.popup-modal-dismiss', function (e) {
+              e.preventDefault();
+              $.magnificPopup.close();
+          });
+
+          $('#update-email-account-popup-open').on('click', function(e){
+            $('#update-email-account-popup-submit-btn').addClass('btn-hidden');
+            $('#update-email-account-popup-additional-text').html('');
+
+            $.ajax({
+              url: '{{ preupdate_message_url }}',
+              method: 'POST',
+              data: {
+                'user_id': {{ request.user.id }},
+                'email_account_id': {{ email_account.id }},
+                'new_smtp_host': $('#smtp_host').val(),
+                'new_smtp_port': $('#smtp_port').val(),
+                'new_email': $('#email').val(),
+                'new_password': $('#password').val(),
+                'csrfmiddlewaretoken': window.csrftoken,
+              },
+              type: 'json',
+            }).always(function(data){
+              if (data['html_template']){
+                $('#update-email-account-popup-additional-text').html(data['html_template']);
+                if (data['has_errors'].toString() === 'false' && data['needs_update'].toString()==='true'){
+                  $('#update-email-account-popup-submit-btn').removeClass('btn-hidden');
+                }
+              } else {
+                $('#update-email-account-popup-additional-text').html('Системная ошибка.');
+              }
+            });
+            return false;
+          });
+
+          $('#update-email-account-popup').removeClass('popup-hidden');
+        },
+        async: true,
+      });
+    });
+  </script>
+{% endblock %}

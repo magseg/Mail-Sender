@@ -1,0 +1,43 @@
+Отправка рассылки через API
+POST /external-mailing
+
+
+Authentication:
+Header: HTTP_API_KEY
+Значение: uuid-строка (полностью или без символов "-")
+
+Request:
+{
+    "from_name": str *
+    "subject": str *
+    "recipients": [
+        email str
+    ],
+    "html_body": str **
+	"cooldown": int optional ***
+}
+
+* суммарная длина "from_name" и "subject" не должна превышать ~990 символов
+
+** разрешенные html-теги и html-атрибуты:
+allowed_html_tags = [
+    'p', 'div', 'span', 'body', 'head', 'html', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7', 'b', 'i', 'strong', 'em',
+    'img', 'a', 'table', 'thead', 'tbody', 'th', 'td', 'tr', 'br', 'style',
+]
+allowed_html_attributes = ['href', 'src', 'style', 'title', 'class', 'id', ]
+
+Все остальные теги и атрибуты будут экранированы с помощью HTML-спецсимволов
+
+*** целое число, указывающее десятые доли секунды задержки между отправками писем
+
+
+Response:
+{}
+204 OK
+
+
+Errors:
+400 -- Неверный формат запроса.
+401 -- Токен аутентификации имеет неверный формат.
+401 -- Неверный токен авторизации.
+409 -- Для аккаунта не задан host или port.

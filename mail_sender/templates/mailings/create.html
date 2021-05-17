@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block styles %}
+  .custom_addressee_list_row_hidden{
+    display: none;
+  }
+{% endblock %}
+
+{% block title %}
+    Создать рассылку
+{% endblock %}
+
+
+{% block content %}
+  <form action="{{ form_create_url }}" method="POST" id="create_mailing_form" name="create_mailing_form">
+  {% csrf_token %}
+  </form>
+
+  <div id="send-email-popup" class="white-popup-block mfp-hide popup-hidden">
+    <h2>Вы действительно хотите отправить рассылку?</h2>
+    <div id="send-email-popup-help-text" style="margin-bottom: 10px;"></div>
+    <div class="btn-group" role="group">
+    <button
+      type="submit"
+      id="update-email-account-popup-submit-btn"
+      class="btn btn-sm btn-success btn-hidden"
+      href="#"
+      form="create_mailing_form"
+    >Отправить</button>
+    <a class="popup-modal-dismiss btn btn-sm btn-danger" href="#">Отмена</a>
+    </div>
+  </div>
+
+  {% if create_errors %}
+  <div class="form-group">
+    <div class="alert alert-danger alert-dismissable fade in">
+      <a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>
+      <ul>
+      {% for error in create_errors %}
+        <li>{{ error }}</li>
+      {% endfor %}
+      </ul>
+    </div>
+  </div>
+{% endif %}
+
+  <div class="row">
+    <div class="form-group">
+      <label for="email_account">Выбрать почту для рассылки</label>
+      <select id="email_account" name="email_account" class="form-control" form="create_mailing_form">
+        {% for email_account in list_of_email_accounts %}
+          <option value="{{ email_account.id }}">{{ email_account.email }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  <div class="row" style="margin-bottom: 20px; margin-top: -10px;">
+    <a href="{{ email_account_list_url }}">Добавить новую</a>
+  </div>
+
+  <div class="row">
+    <div class="form-group">
+      <label for="addressee_list">Выбрать список адресатов</label>
+      <select id="addressee_list" name="addressee_list" class="form-control" form="create_mailing_form">
+        {% for addressee_list in list_of_addressee %}
+          <option value="{{ addressee_list.key }}">{{ addressee_list.value }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  <div class="row custom_addressee_list_row_hidden" style="margin-bottom: 15px;" id="custom_addressee_list_row">
+    <label for="custom_addressee_list">Введите список адресов, разделенных точкой с запятой (;)</label>
+    <textarea class="form-control" id="custom_addressee_list" name="custom_addressee_list" form="create_mailing_form">
+    </textarea>
+  </div>
+  <div class="row" style="margin-bottom: 20px; margin-top: -10px;">
+    <a href="{{ addressees_list_url }}">Добавить новый</a>
+  </div>
+
+  <div class="row">
+    <div class="form-group">
+      <label for="html_template">Выбрать HTML-шаблон</label>
+      <select id="html_template" name="html_template" class="form-control" form="create_mailing_form">
+        {% for html_template in list_of_html_templates %}
+          <option value="{{ html_template.key }}">{{ html_template.value }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  <div class="row" style="margin-bottom: 20px; margin-top: -10px;">
+    <a href="{{ html_list_url }}">Добавить новый</a>
+  </div>
+
+  <div class="row">
+    <div class="form-group">
+      <label for="from">Имя отправителя</label>
+      <input type="text" placeholder="Имя отправителя" id="from" name="from" class="form-control" form="create_mailing_form" />
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="form-group">
+      <label for="subject">Тема письма</label>
+      <input type="text" placeholder="Новое сообщение" id="subject" name="subject" class="form-control" form="create_mailing_form" />
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="form-group">
+      <label for="cooldown">Задержка между запросами (в десятых долях секунды)</label>
+      <input type="number" value=15 id="cooldown" name="cooldown" class="form-control" form="create_mailing_form" />
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="form-group">
+      <a class="btn btn-primary pull-right" href="#send-email-popup" id="send-email-popup-button">
+        <i class="glyphicon glyphicon-envelope"></i>&nbsp;Отправить
+      </a>
+    </div>
+  </div>
+
+  <script>
+    jQuery(function () {
+      window.addressee_list = $('#addressee_list');
+      window.addressee_list_create_block = $( '#custom_addressee_list_row' );
+
+      window.addressee_list.on('load change', function(e){
+        if (window.addressee_list.val().toString() === '0'){
+          window.addressee_list_create_block.removeClass('custom_addressee_list_row_hidden');
+        } else {
+          window.addressee_list_create_block.addClass('custom_addressee_list_row_hidden');
+        }
+      });
+
+      $.ajax({
+        url: "{% static 'js/jquery.magnific-popup.js' %}",
+        dataType: "script",
+        cache: true,
+        success: function(data){
+          $('head')
+            .append( $("<link rel=\"stylesheet\" type=\"text/css\" />")
+            .attr('href', "{% static 'css/magnific-popup.css' %}") );
+
+          $('#send-email-popup-button').magnificPopup({
+            type: 'inline',
+            preloader: false,
+            modal: true
+          });
+
+          $('#send-email-popup-button').on('click', function(e){
+            var help_text_div = $('#send-email-popup-help-text');
+            help_text_div.html('');
+            var help_text = '';
+            var help_dict = [
+              {
+                key: 'Почта для рассылки',
+                value: $( "#email_account option:selected" ).text(),
+              },
+              {
+                key: 'Список адресатов',
+                value: ($( "#addressee_list option:selected" ).attr('value').toString() === '0') ? $('#custom_addressee_list').val() : $( "#addressee_list option:selected" ).text(),
+              },
+              {
+                key: 'HTML-шаблон',
+                value: $( "#html_template option:selected" ).text(),
+              },
+              {
+                key: 'Имя отправителя',
+                value: $( "#from" ).val(),
+              },
+              {
+                key: 'Тема письма',
+                value: $( "#subject" ).val(),
+              },
+              {
+                key: 'Задержка',
+                value: (parseInt($( "#cooldown" ).val() || 0) / 10.0).toFixed(1) + ' сек.',
+              },
+            ];
+            for (var i=0; i<help_dict.length;i++){
+              console.log($( "#addressee_list option:selected" ).attr('value').toString() === '0');
+              help_text = help_text + '<li>' + help_dict[i].key + ': ' + help_dict[i].value + '</li>';
+            }
+            help_text_div.html('<ul>' + help_text + '</ul>');
+          });
+
+          $(document).on('click', '.popup-modal-dismiss', function (e) {
+            e.preventDefault();
+            $.magnificPopup.close();
+          });
+        }
+      });
+
+      window.addressee_list.ready( window.addressee_list.trigger('change') );
+    });
+  </script>
+{% endblock %}

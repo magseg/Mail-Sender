@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% load custom_tags %}
+
+{% block title %}
+  Отписавшиеся от рассылки {{ email_account.email }}
+{% endblock %}
+
+{% block content %}
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Пользователь</th>
+        <th>Дата и время</th>
+        <th>Причина отписки</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for unsubscriber in unsubscribers %}
+        <tr>
+          <td>{{ unsubscriber.email }}</td>
+          <td>{% frontend_datetime unsubscriber.created_at %}</td>
+          <td>{{ unsubscriber.reason }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

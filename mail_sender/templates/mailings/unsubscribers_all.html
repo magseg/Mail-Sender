@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}
+  Отписавшиеся от рассылки
+{% endblock %}
+
+{% block content %}
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Почта</th>
+        <th>SMTP</th>
+        <th>Число отписавшихся</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for account in accounts %}
+        <tr>
+          <td><a href="{{ item_url }}{{ account.id }}">{{ account.email }}</a></td>
+          <td>{{ account.get_smtp_host }}:{{ account.get_smtp_port }}</td>
+          <td>{{ account.unsubscribers_count }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

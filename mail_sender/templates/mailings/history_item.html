@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% load custom_tags %}
+
+{% block title %}
+    Мои рассылки (история)
+{% endblock %}
+
+{% block content %}
+
+<div class="row">
+  <div class="col-xs-5 col-sm-4 col-md-2">
+    <span style="font-size: 10pt;">Имя отправителя</span><br>
+    <h4 style="margin-top: 0px; font-weight: 700;">{{ sender_history.from_name }}</h4>
+  </div>
+  <div class="col-xs-7 col-sm-5 col-md-4">
+    <span style="font-size: 10pt;">Тема письма</span><br>
+    <h4 style="margin-top: 0px; font-weight: 700;">{{ sender_history.subject }}</h4>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-sm-12">
+    <h5 style="font-weight: 900; color: #AAAAAA; margin-top: 0px; margin-bottom: 20px;">{% frontend_datetime sender_history.created_at %}</h5>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-xs-4 col-md-3">
+    <ul class="list-group">
+      <li class="list-group-item" style="background-color: #f9f0a8;">
+        <table style="border: none;">
+          <tr>
+            <td>
+              <span class="glyphicon glyphicon-envelope" style="font-size:30pt;"></span>
+            </td>
+            <td style="width:100%;">
+              &nbsp;
+            </td>
+            <td>
+              <h3 style="margin-bottom: 0px; margin-top: 0px;">{{ sender_history.total_mailings }}</h3>
+              <span style="font-size: 9pt;">Всего</span><br>
+            </td>
+          </tr>
+        </table>
+      </li>
+    </ul>
+  </div>
+
+  <div class="col-xs-4 col-md-3">
+    <ul class="list-group">
+      <li class="list-group-item" style="background-color: #fca5af;">
+        <table style="border: none;">
+          <tr>
+            <td>
+              <span class="glyphicon glyphicon-alert" style="font-size:30pt;"></span>
+            </td>
+            <td style="width:100%;">
+              &nbsp;
+            </td>
+            <td>
+              <h3 style="margin-bottom: 0px; margin-top: 0px;">{{ sender_history.failed }}</h3>
+              <span style="font-size: 9pt;">Неотправленные</span><br>
+            </td>
+          </tr>
+        </table>
+      </li>
+    </ul>
+  </div>
+
+  <div class="col-xs-4 col-md-3">
+    <ul class="list-group">
+      <li class="list-group-item" style="background-color: #a8ea9e;">
+        <table style="border: none;">
+          <tr>
+            <td>
+              <span class="glyphicon glyphicon-envelope" style="font-size:30pt;"></span>
+            </td>
+            <td style="width:100%;">
+              &nbsp;
+            </td>
+            <td>
+              <h3 style="margin-bottom: 0px; margin-top: 0px;">{{ sender_history.successed }}</h3>
+              <span style="font-size: 9pt;">Отправленные</span><br>
+            </td>
+          </tr>
+        </table>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Получатель</th>
+      <th>Дата и время</th>
+      <th>Статус отправки</th>
+      <th>Описание ошибки</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in items %}
+      <tr>
+        <td>{{ item.to }}</td>
+        <td>{% frontend_datetime item.created_at %}</td>
+        <td>{% if item.sent %}Успешно{% else %}Ошибка{% endif %}</td>
+        <td>{{ item.error }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

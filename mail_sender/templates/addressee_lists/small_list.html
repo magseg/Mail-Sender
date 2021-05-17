@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}
+  Список адресатов
+{% endblock %}
+
+{% block content %}
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Email клиента</th>
+        <th>Отписан от рассылки</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for addressee in addressee_small_list %}
+        <tr>
+          <td>{{ addressee.email }}</td>
+          <td>{{ addressee.email_accounts }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% if errors %}
+  Обновление невозможно, т.к. в процессе валидации были выявлены следующие ошибки:
+  <ul>
+    {% for error in errors %}
+      <li>{{ error }}</li>
+    {% endfor %}
+  </ul>
+{% elif needs_update %}
+  Вы действительно хотите обновить данные Email-аккаунта?<br><br>
+  {% if is_new_smtp %}
+    {% if is_common_smtp %}
+      Будет использован общедоступный SMTP-сервер с указанными сервером и портом: {{ smtp_name }}.
+    {% elif is_new_custom_smtp %}
+      Будет создан новый пользовательский SMTP-сервер с указанными параметрами:<br><strong>{{ smtp_host }}:{{ smtp_port }}</strong>.
+    {% else %}
+      Будет использован ваш существующий SMTP-сервер {{ smtp_name }}.
+    {% endif %}
+    <br>
+  {% endif %}
+  {% if is_new_password %}
+    Будет изменён пароль.
+    <br>
+  {% endif %}
+{% else %}
+  Обновление не требуется.
+{% endif %}

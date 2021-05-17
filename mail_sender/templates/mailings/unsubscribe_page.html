@@ -1,0 +1,25 @@
+{% extends "base_unsubscribe.html" %}
+
+{% block title %}
+  Отписаться от рассылки
+{% endblock %}
+
+{% block content %}
+  <form method="POST" action="{{ unsubscribe_url }}">
+    <div class="form-group">
+      <label for="email">Введите ваш Email для подтверждения</label>
+      <input class="form-control" id="email" name="email" placeholder="example@mail.ru" />
+    </div>
+
+    <h3 style="text-align: center">Укажите, пожалуйста, причину отписки</h3>
+    <h5 style="text-align: center">Это необязательно, но вы нам очень поможете</h5>
+    <div class="form-group">
+      <label for="reason">Причина отписки</label>
+      <textarea class="form-control" id="reason" name="reason" placeholder="Рассылка не интересна"></textarea>
+    </div>
+
+    <div class="form-group">
+      <button type="submit" class="btn btn-primary">Отписаться</button>
+    </div>
+  </form>
+{% endblock %}
